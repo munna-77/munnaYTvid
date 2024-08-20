@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Upload Website</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #ff6347;
+            color: white;
+            padding: 1em 0;
+            text-align: center;
+        }
+        .container {
+            padding: 2em;
+            text-align: center;
+        }
+        .login-form, .upload-form, .video-list, .favorites-list, .liked-list {
+            margin-top: 2em;
+        }
+        .btn {
+            background-color: #ff6347;
+            color: white;
+            padding: 0.5em 1em;
+            text-decoration: none;
+            font-size: 1em;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #ff4500;
+        }
+        .video-item {
+            margin-bottom: 1em;
+        }
+        .video-item button {
+            margin-left: 1em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Video Upload Website</h1>
+    </header>
+    <div class="container">
+        <div id="loginSection" class="login-form">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <label>
+                    <input type="radio" name="role" value="user" checked> User
+                </label>
+                <label>
+                    <input type="radio" name="role" value="admin"> Admin
+                </label>
+                <div id="adminCredentials" style="display: none;">
+                    <input type="text" id="adminId" placeholder="Admin ID">
+                    <input type="password" id="adminPassword" placeholder="Password">
+                </div>
+                <button type="submit" class="btn">Login</button>
+            </form>
+        </div>
+        <div id="uploadSection" class="upload-form" style="display: none;">
+            <h2>Upload a New Video</h2>
+            <form id="uploadForm">
+                <input type="text" id="videoLink" placeholder="Enter YouTube video link" required>
+                <button type="submit" class="btn">Upload Video</button>
+            </form>
+        </div>
+        <div class="video-list" id="videoList">
+            <h2>Uploaded Videos</h2>
+            <!-- Video links will be added here -->
+        </div>
+        <div class="favorites-list" id="favoritesList" style="display: none;">
+            <h2>Favorites</h2>
+            <!-- Favorite videos will be added here -->
+        </div>
+        <div class="liked-list" id="likedList" style="display: none;">
+            <h2>Liked Videos</h2>
+            <!-- Liked videos will be added here -->
+        </div>
+    </div>
+    <script>
+        let favorites = [];
+        let likedVideos = [];
+
+        document.querySelectorAll('input[name="role"]').forEach((elem) => {
+            elem.addEventListener('change', function(event) {
+                if (event.target.value === 'admin') {
+                    document.getElementById('adminCredentials').style.display = 'block';
+                } else {
+                    document.getElementById('adminCredentials').style.display = 'none';
+                }
+            });
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const role = document.querySelector('input[name="role"]:checked').value;
+            if (role === 'admin') {
+                const adminId = document.getElementById('adminId').value;
+                const adminPassword = document.getElementById('adminPassword').value;
+                if (adminId === '77' && adminPassword === '7') {
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('uploadSection').style.display = 'block';
+                } else {
+                    alert('Invalid Admin ID or Password');
+                }
+            } else {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('favoritesList').style.display = 'block';
+                document.getElementById('likedList').style.display = 'block';
+            }
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const videoLink = document.getElementById('videoLink').value;
+            if (videoLink) {
+                addVideo(videoLink);
+                document.getElementById('videoLink').value = '';
+            }
+        });
+
+        function addVideo(videoLink) {
+            const videoList = document.getElementById('videoList');
+            const videoItem = document.createElement('div');
+            videoItem.className = 'video-item';
+            videoItem.innerHTML = `
+                <iframe width="560" height="315" src="${videoLink.replace('watch?v=', 'embed/')}" frameborder="0" allowfullscreen></iframe>
+                <button class="btn" onclick="deleteVideo(this)">Delete</button>
+                <button class="btn" onclick="likeVideo('${videoLink}')">Like</button>
+                <button class="btn" onclick="saveToFavorites('${videoLink}')">Save to Favorites</button>
+            `;
+            videoList.appendChild(videoItem);
+        }
+
+        function deleteVideo(button) {
+            const videoItem = button.parentElement;
+            videoItem.remove();
+        }
+
+        function likeVideo(videoLink) {
+            if (!likedVideos.includes(videoLink)) {
+                likedVideos.push(videoLink);
+                updateLikedVideos();
+            }
+        }
+
+        function saveToFavorites(videoLink) {
+            if (!favorites.includes(videoLink)) {
+                favorites.push(videoLink);
+                updateFavorites();
+            }
+        }
+
+        function updateFavorites() {
+            const favoritesList = document.getElementById('favoritesList');
+            favoritesList.innerHTML = '<h2>Favorites</h2>';
+            favorites.forEach(videoLink => {
+                const videoItem = document.createElement('div');
+                videoItem.className = 'video-item';
+                videoItem.innerHTML = `<iframe width="560" height="315" src="${videoLink.replace('watch?v=', 'embed/')}" frameborder="0" allowfullscreen></iframe>`;
+                favoritesList.appendChild(videoItem);
+            });
+        }
+
+        function updateLikedVideos() {
+            const likedList = document.getElementById('likedList');
+            likedList.innerHTML = '<h2>Liked Videos</h2>';
+            likedVideos.forEach(videoLink => {
+                const videoItem = document.createElement('div');
+                videoItem.className = 'video-item';
+                videoItem.innerHTML = `<iframe width="560" height="315" src="${videoLink.replace('watch?v=', 'embed/')}" frameborder="0" allowfullscreen></iframe>`;
+                likedList.appendChild(videoItem);
+            });
+        }
+    </script>
+</body>
+</html>
